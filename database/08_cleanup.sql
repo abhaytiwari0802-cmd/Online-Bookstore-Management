@@ -1,0 +1,61 @@
+SET DEFINE OFF;
+-- ============================================================================
+-- ONLINE BOOKSTORE MANAGEMENT SYSTEM
+-- Script: 08_cleanup.sql
+-- Description: Clean teardown of all database objects created by the system.
+-- Target DB: Oracle Database 19c / 21c / 23c / XE
+-- ============================================================================
+
+-- Drop Views
+DROP VIEW VW_SYSTEM_AUDIT_TRAIL;
+DROP VIEW VW_SALES_BY_CATEGORY;
+DROP VIEW VW_USER_ORDERS_SUMMARY;
+DROP VIEW VW_ACTIVE_CATALOG;
+
+-- Drop Functions
+DROP FUNCTION FN_CALCULATE_DISCOUNT;
+DROP FUNCTION FN_CHECK_BOOK_AVAILABILITY;
+
+-- Drop Triggers (will be dropped with tables, but drop explicitly for clarity)
+BEGIN
+    FOR trg IN (SELECT trigger_name FROM user_triggers WHERE trigger_name IN (
+        'TRG_PREVENT_NEGATIVE_STOCK', 'TRG_ORDER_ITEMS_CALC_TOTAL',
+        'TRG_USERS_UPDATE_TIMESTAMP', 'TRG_BOOKS_UPDATE_TIMESTAMP',
+        'TRG_AUDIT_USERS', 'TRG_AUDIT_ORDERS'
+    )) LOOP
+        EXECUTE IMMEDIATE 'DROP TRIGGER ' || trg.trigger_name;
+    END LOOP;
+END;
+/
+
+-- Drop Packages
+DROP PACKAGE PKG_REPORTS;
+DROP PACKAGE PKG_ORDER_MGMT;
+DROP PACKAGE PKG_CART_MGMT;
+DROP PACKAGE PKG_BOOK_MGMT;
+DROP PACKAGE PKG_USER_MGMT;
+
+-- Drop Tables in reverse dependency order
+DROP TABLE AUDIT_LOGS CASCADE CONSTRAINTS;
+DROP TABLE REVIEWS CASCADE CONSTRAINTS;
+DROP TABLE PAYMENTS CASCADE CONSTRAINTS;
+DROP TABLE ORDER_ITEMS CASCADE CONSTRAINTS;
+DROP TABLE ORDERS CASCADE CONSTRAINTS;
+DROP TABLE CART_ITEMS CASCADE CONSTRAINTS;
+DROP TABLE BOOKS CASCADE CONSTRAINTS;
+DROP TABLE CATEGORIES CASCADE CONSTRAINTS;
+DROP TABLE USERS CASCADE CONSTRAINTS;
+DROP TABLE ROLES CASCADE CONSTRAINTS;
+
+-- Drop Sequences
+BEGIN
+    FOR seq IN (SELECT sequence_name FROM user_sequences WHERE sequence_name IN (
+        'SEQ_USERS', 'SEQ_CATEGORIES', 'SEQ_BOOKS', 'SEQ_CART', 
+        'SEQ_ORDERS', 'SEQ_ORDER_ITEMS', 'SEQ_REVIEWS', 'SEQ_AUDIT', 'SEQ_PAYMENTS'
+    )) LOOP
+        EXECUTE IMMEDIATE 'DROP SEQUENCE ' || seq.sequence_name;
+    END LOOP;
+END;
+/
+
+COMMIT;

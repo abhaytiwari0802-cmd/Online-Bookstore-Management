@@ -1,0 +1,24 @@
+{
+  "name": "online-bookstore-plsql",
+  "version": "1.0.0",
+  "description": "Online Bookstore Management System using Oracle PL/SQL, RESTful APIs, and modern HTML/CSS/JavaScript UI.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node -e \"console.log('Automated PL/SQL unit tests are in database/07_test_suite.sql')\""
+  },
+  "keywords": [
+    "oracle",
+    "plsql",
+    "bookstore",
+    "database-management",
+    "triggers",
+    "stored-procedures",
+    "packages"
+  ],
+  "author": "Online Bookstore Project Team",
+  "license": "MIT",
+  "optionalDependencies": {
+    "oracledb": "^6.10.0"
+  }
+}

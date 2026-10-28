@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Start Bookstore Server",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/server/server.js",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PORT": "3000",
+        "USE_ORACLE": "false"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Start with Live Oracle DB",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/server/server.js",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PORT": "3000",
+        "USE_ORACLE": "true",
+        "DB_USER": "bookstore_user",
+        "DB_PASSWORD": "your_oracle_password",
+        "DB_CONNECT_STRING": "localhost:1521/XEPDB1"
+      }
+    }
+  ]
+}

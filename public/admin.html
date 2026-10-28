@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Online Bookstore Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <style>
+        .admin-layout {
+            max-width: 1300px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+        .admin-nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+        .admin-nav-tab {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .admin-nav-tab:hover {
+            color: var(--primary);
+        }
+        .admin-nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background: #fff;
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .kpi-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.35rem;
+        }
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+        .data-table-container {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .data-table-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .data-table-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.92rem;
+        }
+        th {
+            background: #f8fafc;
+            padding: 0.85rem 1.25rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+        }
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tr:hover td {
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="admin.html" class="brand">
+                <span class="brand-icon">⚙️</span>
+                <span>Novella<strong>Admin</strong></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="index.html" class="btn btn-outline btn-sm">
+                    🏪 Back to Storefront
+                </a>
+                <a href="plsql-runner.html" class="btn btn-outline btn-sm">
+                    ⚡ PL/SQL Explorer
+                </a>
+                <button id="btn-reset-db" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" title="Reset simulator to original seed">
+                    🔄 Reset DB Seed
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-layout">
+        <!-- Unauthorized Banner (if not logged in as Admin) -->
+        <div id="admin-access-warning" style="display:none; background:#fef3c7; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                    <strong style="color: #92400e;">Notice:</strong>
+                    <span style="color: #78350f;"> You are viewing the Admin Portal in preview mode. Log in as an administrator for verified session credentials.</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="API.login('admin', 'Admin@123').then(() => location.reload())">
+                    Instant Admin Login (admin / Admin@123)
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="admin-nav-tabs">
+            <button class="admin-nav-tab active" data-tab="dashboard">📊 KPI Dashboard</button>
+            <button class="admin-nav-tab" data-tab="books">📚 Books Catalog (PKG_BOOK_MGMT)</button>
+            <button class="admin-nav-tab" data-tab="orders">📦 Order Workflow (PKG_ORDER_MGMT)</button>
+            <button class="admin-nav-tab" data-tab="reports">📈 Analytics & Reports (PKG_REPORTS)</button>
+            <button class="admin-nav-tab" data-tab="audit">📋 Audit Trail (AUDIT_LOGS)</button>
+        </div>
+
+        <!-- TAB 1: Dashboard Overview -->
+        <div id="tab-dashboard" class="tab-pane active">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Revenue</div>
+                    <div id="kpi-revenue" class="kpi-value" style="color: var(--success);">$0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Completed Orders</div>
+                    <div id="kpi-orders" class="kpi-value">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Active Book Titles</div>
+                    <div id="kpi-books" class="kpi-value">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Registered Customers</div>
+                    <div id="kpi-users" class="kpi-value">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Pending Orders</div>
+                    <div id="kpi-pending" class="kpi-value" style="color: var(--warning);">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Low Stock Alerts</div>
+                    <div id="kpi-low-stock" class="kpi-value" style="color: var(--danger);">0</div>
+                </div>
+            </div>
+
+            <!-- Bestsellers Quick Glance -->
+            <div class="data-table-container">
+                <div class="data-table-header">
+                    <h3>Top 5 Best-Selling Titles (<code>PKG_REPORTS.get_best_selling_books</code>)</h3>
+                </div>
+                <div id="dash-bestsellers-list" style="padding: 1.5rem;">
+                    <!-- Injected via admin.js -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Book Catalog Management -->
+        <div id="tab-books" class="tab-pane">
+            <div class="data-table-container">
+                <div class="data-table-header">
+                    <h3>Inventory Catalog Management</h3>
+                    <button id="btn-add-new-book" class="btn btn-primary btn-sm">+ Add New Book</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Book ID</th>
+                                <th>Title & Author</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-books-table-body">
+                            <!-- Injected via admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Order Workflow Management -->
+        <div id="tab-orders" class="tab-pane">
+            <div class="data-table-container">
+                <div class="data-table-header">
+                    <h3>Customer Orders & Status Pipeline (<code>PKG_ORDER_MGMT</code>)</h3>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status Workflow</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-table-body">
+                            <!-- Injected via admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: Business Reports & Analytics -->
+        <div id="tab-reports" class="tab-pane">
+            <!-- 1. Best Selling Books -->
+            <div class="data-table-container">
+                <div class="data-table-header">
+                    <h3>Best-Selling Books (Units Sold & Revenue)</h3>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Book Title</th>
+                                <th>Category</th>
+                                <th>Unit Price</th>
+                                <th>Units Sold</th>
+                                <th>Total Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-bestsellers-table">
+                            <!-- Injected via admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+                <!-- 2. Sales Trends -->
+                <div class="data-table-container">
+                    <div class="data-table-header">
+                        <h3>Monthly Sales Trends</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Orders</th>
+                                    <th>Sales Volume</th>
+                                    <th>Avg Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-trends-table">
+                                <!-- Injected via admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. Category Performance -->
+                <div class="data-table-container">
+                    <div class="data-table-header">
+                        <h3>Genre / Category Performance</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Catalog Count</th>
+                                    <th>Units Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-categories-table">
+                                <!-- Injected via admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Low Stock Alert -->
+            <div class="data-table-container">
+                <div class="data-table-header">
+                    <h3 style="color: var(--danger);">⚠️ Low Stock Replenishment Warnings (Stock &le; 10)</h3>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Book ID</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Remaining Quantity</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-lowstock-table">
+                            <!-- Injected via admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: System Audit Trail -->
+        <div id="tab-audit" class="tab-pane">
+            <div class="data-table-container">
+                <div class="data-table-header">
+                    <h3>Compliance Audit Trail (Trigger: <code>TRG_AUDIT_USERS</code>, <code>TRG_AUDIT_ORDERS</code>)</h3>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Log ID</th>
+                                <th>Table Name</th>
+                                <th>Action</th>
+                                <th>Record Ref</th>
+                                <th>Changed By</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-audit-table-body">
+                            <!-- Injected via admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add / Edit Book Modal -->
+    <div id="admin-book-backdrop" class="modal-backdrop"></div>
+    <div id="admin-book-modal" class="modal-backdrop">
+        <div class="modal" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 id="admin-book-modal-title">Book Editor</h3>
+                <button id="admin-book-close-btn" class="btn-close">&times;</button>
+            </div>
+            <form id="form-admin-book">
+                <div class="modal-body">
+                    <input type="hidden" id="admin-book-id">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Book Title</label>
+                            <input type="text" id="book-form-title" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ISBN-13</label>
+                            <input type="text" id="book-form-isbn" class="form-control" placeholder="978-..." required>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Author(s)</label>
+                            <input type="text" id="book-form-author" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category / Genre</label>
+                            <select id="book-form-category" class="form-control" required>
+                                <option value="101">Computer Science</option>
+                                <option value="102">Databases & SQL</option>
+                                <option value="103">Fiction & Literature</option>
+                                <option value="104">Science & Nature</option>
+                                <option value="105">Business & Leadership</option>
+                                <option value="106">Sci-Fi & Fantasy</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Price ($)</label>
+                            <input type="number" step="0.01" id="book-form-price" class="form-control" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock Quantity</label>
+                            <input type="number" id="book-form-stock" class="form-control" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Publication Year</label>
+                            <input type="number" id="book-form-year" class="form-control" min="1800" max="2030">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Publisher</label>
+                        <input type="text" id="book-form-publisher" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cover Image URL</label>
+                        <input type="url" id="book-form-cover" class="form-control" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="book-form-desc" class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Save Book Details</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

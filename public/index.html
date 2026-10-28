@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novella Bookstore | Online Bookstore Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <span class="brand-icon">📚</span>
+                <span>Novella<strong>Books</strong></span>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="nav-search">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" class="search-input" placeholder="Search by title, author, or ISBN...">
+            </div>
+
+            <!-- Header Actions -->
+            <div class="nav-actions">
+                <a href="plsql-runner.html" class="btn btn-outline btn-sm" title="Explore Oracle PL/SQL Packages & Triggers">
+                    ⚡ PL/SQL Explorer
+                </a>
+                <a href="admin.html" id="admin-nav-link" class="btn btn-outline btn-sm" style="display: none;">
+                    ⚙️ Admin Portal
+                </a>
+                <button id="auth-btn" class="btn btn-outline">
+                    Sign In / Register
+                </button>
+                <button id="cart-toggle-btn" class="btn btn-cart">
+                    🛒 Cart
+                    <span id="cart-badge" class="cart-badge">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Online Bookstore Management System</h1>
+                <p>Enterprise PL/SQL transactional architecture featuring packages, triggers, cursor procedures, audit logging, and dynamic inventory control.</p>
+                <div class="hero-tags">
+                    <span class="hero-tag">⚡ Oracle PL/SQL 23c</span>
+                    <span class="hero-tag">🔒 SHA-256 Auth</span>
+                    <span class="hero-tag">📦 Row-Locking Stock Check</span>
+                    <span class="hero-tag">📋 Audit Logging Triggers</span>
+                    <span class="hero-tag">📊 Business Reporting</span>
+                </div>
+            </div>
+            <div style="font-size: 6rem; opacity: 0.85;">📖</div>
+        </div>
+    </section>
+
+    <!-- Main Catalog Container -->
+    <main class="main-container">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <div class="filter-header">
+                <h3>Filters</h3>
+                <button id="btn-reset-filters" class="btn btn-outline btn-sm">Reset</button>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-title">Book Categories</div>
+                <ul id="category-list" class="category-list">
+                    <li class="category-item active" data-id="">
+                        <span>All Categories</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-title">Price Range ($)</div>
+                <div class="price-inputs">
+                    <input type="number" id="min-price" class="price-input" placeholder="Min" min="0">
+                    <span style="color: var(--text-muted);">-</span>
+                    <input type="number" id="max-price" class="price-input" placeholder="Max" min="0">
+                </div>
+                <button id="btn-apply-filters" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 0.75rem;">
+                    Apply Price Filter
+                </button>
+            </div>
+
+            <div class="filter-section" style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm); border: 1px dashed var(--border);">
+                <div style="font-size: 0.82rem; font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">PROMO COUPONS</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem;">Try these in your shopping cart:</p>
+                <code style="display:block; font-size:0.75rem; margin-bottom:0.25rem;">BOOKWORM10 (10% off)</code>
+                <code style="display:block; font-size:0.75rem; margin-bottom:0.25rem;">READ20 (20% off over $40)</code>
+                <code style="display:block; font-size:0.75rem;">FREESHIP ($5 off shipping)</code>
+            </div>
+        </aside>
+
+        <!-- Catalog View -->
+        <section class="catalog-view">
+            <div class="catalog-header">
+                <div id="catalog-count" class="catalog-count">Showing books...</div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 0.88rem; color: var(--text-muted);">Sort by:</span>
+                    <select id="sort-select" class="sort-select">
+                        <option value="TITLE_ASC">Title: A to Z</option>
+                        <option value="TITLE_DESC">Title: Z to A</option>
+                        <option value="PRICE_ASC">Price: Low to High</option>
+                        <option value="PRICE_DESC">Price: High to Low</option>
+                        <option value="NEWEST">Newest Additions</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Books Grid -->
+            <div id="books-grid" class="books-grid">
+                <!-- Injected via app.js -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Slide-out Shopping Cart Drawer -->
+    <div id="cart-backdrop" class="cart-drawer-backdrop"></div>
+    <div id="cart-drawer" class="cart-drawer">
+        <div class="cart-header">
+            <h3>Your Shopping Basket</h3>
+            <button id="cart-close-btn" class="btn-close">&times;</button>
+        </div>
+        <div id="cart-items-list" class="cart-body">
+            <!-- Injected via app.js -->
+        </div>
+        <div class="cart-footer">
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <input type="text" id="promo-input" class="form-control" placeholder="Promo code (e.g. READ20)" style="font-size: 0.88rem; padding: 0.45rem 0.65rem;">
+                <button id="btn-apply-promo" class="btn btn-outline btn-sm">Apply</button>
+            </div>
+            <div class="cart-summary-row">
+                <span>Subtotal</span>
+                <span id="cart-subtotal">$0.00</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>Estimated Tax (5%)</span>
+                <span id="cart-tax">$0.00</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>Shipping (Free over $50)</span>
+                <span id="cart-shipping">$0.00</span>
+            </div>
+            <div class="cart-summary-row" style="color: var(--success);">
+                <span>Discount</span>
+                <span id="cart-discount">$0.00</span>
+            </div>
+            <div class="cart-summary-row cart-summary-total">
+                <span>Total Due</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+            <button id="btn-checkout" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;" disabled>
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Book Details Modal -->
+    <div id="book-details-backdrop" class="modal-backdrop"></div>
+    <div id="book-details-modal" class="modal-backdrop">
+        <div class="modal" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3>Book Specifications</h3>
+                <button id="book-details-close-btn" class="btn-close">&times;</button>
+            </div>
+            <div id="book-details-content" class="modal-body">
+                <!-- Injected via app.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-backdrop" class="modal-backdrop"></div>
+    <div id="checkout-modal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Order Checkout (PKG_ORDER_MGMT)</h3>
+                <button id="checkout-close-btn" class="btn-close">&times;</button>
+            </div>
+            <form id="form-checkout">
+                <div class="modal-body">
+                    <div style="background: #eef2ff; border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 1.25rem;">
+                        Submitting executes <code>PKG_ORDER_MGMT.place_order</code> with row-level stock locks and transaction rollback protection.
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Recipient Name</label>
+                        <input type="text" id="checkout-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone</label>
+                        <input type="tel" id="checkout-phone" class="form-control" placeholder="+1-555-0199" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Delivery Street Address</label>
+                        <textarea id="checkout-address" class="form-control" placeholder="Street, City, State, ZIP code" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Method</label>
+                        <select id="checkout-payment-method" class="form-control">
+                            <option value="CARD">Credit / Debit Card</option>
+                            <option value="UPI">UPI / Instant Pay</option>
+                            <option value="NETBANKING">Internet Banking</option>
+                            <option value="COD">Cash on Delivery</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Special Delivery Instructions</label>
+                        <input type="text" id="checkout-notes" class="form-control" placeholder="Optional notes for delivery partner">
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        Applied Promo Coupon: <strong id="checkout-promo-display">None</strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">
+                        Confirm & Place Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders & Profile Modal -->
+    <div id="orders-backdrop" class="modal-backdrop"></div>
+    <div id="orders-modal" class="modal-backdrop">
+        <div class="modal" style="max-width: 720px;">
+            <div class="modal-header">
+                <h3>My Order History & Live Tracking</h3>
+                <button id="orders-close-btn" class="btn-close">&times;</button>
+            </div>
+            <div id="orders-list-container" class="modal-body">
+                <!-- Injected via app.js -->
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-outline btn-sm" onclick="API.logout(); location.reload();">Sign Out</button>
+                <button class="btn btn-primary btn-sm" onclick="document.getElementById('orders-modal').classList.remove('active'); document.getElementById('orders-backdrop').classList.remove('active');">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Auth Modal (Login / Register) -->
+    <div id="auth-backdrop" class="modal-backdrop"></div>
+    <div id="auth-modal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Account Authentication</h3>
+                <button id="auth-close-btn" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Demo Quick Fill Buttons -->
+                <div class="quick-accounts">
+                    <div class="quick-accounts-title">Quick Demo Login:</div>
+                    <div class="quick-btn-group">
+                        <button type="button" id="quick-fill-admin" class="btn btn-outline btn-sm" style="flex:1;">
+                            👑 Admin (Admin@123)
+                        </button>
+                        <button type="button" id="quick-fill-user" class="btn btn-outline btn-sm" style="flex:1;">
+                            👤 Customer (User@123)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <button id="tab-login" class="btn btn-primary" style="flex: 1;">Login</button>
+                    <button id="tab-register" class="btn btn-outline" style="flex: 1;">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="form-login">
+                    <div class="form-group">
+                        <label class="form-label">Username or Email</label>
+                        <input type="text" id="login-username" class="form-control" placeholder="admin or johndoe" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Registration Form -->
+                <form id="form-register" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="reg-username" class="form-control" placeholder="e.g. emily_clark" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="reg-email" class="form-control" placeholder="emily@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password (min 6 characters)</label>
+                        <input type="password" id="reg-password" class="form-control" placeholder="••••••••" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="reg-fullname" class="form-control" placeholder="Emily Clark" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" id="reg-phone" class="form-control" placeholder="+1-555-0188">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Default Shipping Address</label>
+                        <textarea id="reg-address" class="form-control" placeholder="Street, City, State"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                        Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div>
+                <strong>Online Bookstore Management System</strong> — Built with Oracle PL/SQL & modern Web UI.
+            </div>
+            <div class="footer-links">
+                <a href="plsql-runner.html">PL/SQL Packages</a>
+                <a href="admin.html">Admin Dashboard</a>
+                <a href="#" onclick="openAuthModal(); return false;">My Account</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
